@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Technic Insights</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
+  <script src="/static/app.js" defer></script>
+</head>
+<body>
+  <header class="wrap">
+    <h1>Technic Insights</h1>
+    <p class="sub">How LEGO Technic sets have grown, and which ones share parts.
+      <a href="/docs">API docs</a></p>
+  </header>
+
+  <main class="wrap">
+    <div id="error" class="error" hidden></div>
+
+    <section class="kpis" id="kpis" aria-label="Summary"></section>
+
+    <section class="card">
+      <h2>Average parts per set</h2>
+      <p class="hint">Technic compared with the whole LEGO catalogue, by release year.</p>
+      <div class="chart"><canvas id="avgChart"></canvas></div>
+    </section>
+
+    <section class="card">
+      <h2>Technic sets released per year</h2>
+      <div class="chart short"><canvas id="countChart"></canvas></div>
+    </section>
+
+    <div class="grid">
+      <section class="card">
+        <h2>Biggest Technic sets</h2>
+        <table id="biggest"><thead><tr><th></th><th>Set</th><th>Year</th><th class="num">Parts</th></tr></thead><tbody></tbody></table>
+      </section>
+      <section class="card">
+        <h2>Most-used parts</h2>
+        <table id="parts"><thead><tr><th>Part</th><th class="num">Qty</th><th class="num">Sets</th></tr></thead><tbody></tbody></table>
+      </section>
+    </div>
+
+    <section class="card">
+      <h2>Find similar sets</h2>
+      <p class="hint">Search for a Technic set to see which others share the most part types (Jaccard similarity, colour ignored).</p>
+      <input id="search" type="search" placeholder="e.g. Bugatti, 42083, crane" autocomplete="off">
+      <ul id="results" class="results"></ul>
+      <div id="selected"></div>
+    </section>
+  </main>
+
+  <footer class="wrap">
+    <p>Data from <a href="https://rebrickable.com/downloads/">Rebrickable</a>.
+      <span id="refreshed"></span>
+      LEGO® is a trademark of the LEGO Group, which does not sponsor or endorse this project.</p>
+  </footer>
+</body>
+</html>

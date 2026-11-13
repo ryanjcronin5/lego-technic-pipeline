@@ -1,0 +1,43 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: technic
+      POSTGRES_PASSWORD: technic
+      POSTGRES_DB: technic
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U technic"]
+      interval: 5s
+      retries: 10
+
+  api:
+    build: .
+    environment:
+      DATABASE_URL: postgresql+psycopg://technic:technic@db:5432/technic
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # One-shot job: `docker compose run --rm etl`
+  etl:
+    build: .
+    command: ["technic-etl"]
+    environment:
+      DATABASE_URL: postgresql+psycopg://technic:technic@db:5432/technic
+      RAW_DIR: /app/data/raw
+    volumes:
+      - rawdata:/app/data
+    depends_on:
+      db:
+        condition: service_healthy
+    profiles: ["jobs"]
+
+volumes:
+  pgdata:
+  rawdata:

@@ -1,0 +1,36 @@
+name: Nightly refresh
+
+# Runs the full pipeline against the live Rebrickable dumps every night.
+# Doubles as an upstream data-contract check: if Rebrickable changes its
+# columns or the data fails a quality gate, this job goes red.
+on:
+  schedule:
+    - cron: "0 4 * * *"
+  workflow_dispatch:
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install .
+      - name: Run pipeline
+        run: technic-etl --database-url sqlite:///data/technic.db
+      - name: Report
+        run: |
+          python - >> "$GITHUB_STEP_SUMMARY" <<'EOF'
+          import sqlite3
+          con = sqlite3.connect("data/technic.db")
+          row = con.execute("SELECT finished_at, sets_loaded, technic_sets, inventory_rows "
+                            "FROM pipeline_runs ORDER BY id DESC LIMIT 1").fetchone()
+          print(f"| finished | sets | technic sets | inventory rows |\n|---|---|---|---|\n| {' | '.join(map(str, row))} |")
+          EOF
+      - uses: actions/upload-artifact@v4
+        with:
+          name: technic-db
+          path: data/technic.db
+          retention-days: 7
