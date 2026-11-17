@@ -34,3 +34,7 @@ jobs:
           name: technic-db
           path: data/technic.db
           retention-days: 7
+      - name: Trigger Render redeploy
+        env:
+          RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
+        run: curl -fsS -X POST "$RENDER_DEPLOY_HOOK" > /dev/null
