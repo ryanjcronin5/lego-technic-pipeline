@@ -1,4 +1,5 @@
-FROM python:3.12-slim
+# ---- api: the app on its own (used by docker compose and CI) ----
+FROM python:3.12-slim AS api
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
@@ -6,13 +7,17 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-# Install dependencies first so code changes don't bust the layer cache.
 COPY pyproject.toml README.md ./
 COPY src ./src
 RUN pip install . && useradd --create-home app && mkdir -p /app/data && chown app /app/data
 
 USER app
 EXPOSE 8000
-HEALTHCHECK --interval=30s --timeout=3s CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')"
+HEALTHCHECK --interval=30s --timeout=3s CMD python -c "import os, urllib.request as u; u.urlopen('http://localhost:%s/api/health' % os.getenv('PORT', '8000'))"
 
-CMD ["uvicorn", "technic.api:app", "--host", "0.0.0.0", "--port", "8000"]
+# Hosting platforms like Render choose the port and pass it in $PORT.
+CMD ["sh", "-c", "exec uvicorn technic.api:app --host 0.0.0.0 --port ${PORT:-8000}"]
+
+# ---- demo: the app with a fresh copy of the data built in (used by Render) ----
+FROM api AS demo
+RUN technic-etl && rm -rf data/raw
