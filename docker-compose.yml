@@ -15,7 +15,9 @@ services:
       retries: 10
 
   api:
-    build: .
+    build:
+      context: .
+      target: api
     environment:
       DATABASE_URL: postgresql+psycopg://technic:technic@db:5432/technic
     ports:
@@ -26,7 +28,9 @@ services:
 
   # One-shot job: `docker compose run --rm etl`
   etl:
-    build: .
+    build:
+      context: .
+      target: api
     command: ["technic-etl"]
     environment:
       DATABASE_URL: postgresql+psycopg://technic:technic@db:5432/technic
