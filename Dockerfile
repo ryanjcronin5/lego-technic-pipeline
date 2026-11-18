@@ -20,4 +20,7 @@ CMD ["sh", "-c", "exec uvicorn technic.api:app --host 0.0.0.0 --port ${PORT:-800
 
 # ---- demo: the app with a fresh copy of the data built in (used by Render) ----
 FROM api AS demo
+# Cache key: Docker re-checks this remote file on every build, so the data
+# step below re-runs whenever Rebrickable publishes new data.
+ADD https://cdn.rebrickable.com/media/downloads/sets.csv.gz /tmp/rebrickable-sets.csv.gz
 RUN technic-etl && rm -rf data/raw
