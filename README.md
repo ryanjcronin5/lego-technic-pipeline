@@ -2,6 +2,11 @@
 
 [![CI](https://github.com/ryanjcronin5/lego-technic-pipeline/actions/workflows/ci.yml/badge.svg)](https://github.com/ryanjcronin5/lego-technic-pipeline/actions/workflows/ci.yml)
 
+
+**Live demo: [technic-insights.onrender.com](https://technic-insights.onrender.com)** (free hosting, so the first visit after a quiet spell can take 30–60 s to wake up)
+
+![Technic Insights dashboard](docs/dashboard.png)
+
 An automated data pipeline and analytics API over the full LEGO catalogue (~25k sets), focused on **LEGO Technic**. It downloads the public [Rebrickable](https://rebrickable.com/downloads/) data dumps on a schedule, validates and transforms them, loads them into Postgres (or SQLite) and serves the results through a FastAPI backend and a small dashboard.
 
 Questions it answers:
@@ -78,6 +83,15 @@ ruff check . && ruff format --check .
 - **[Nightly refresh](.github/workflows/nightly.yml)**: runs the real pipeline against live Rebrickable data, posts a run summary and uploads the database as an artifact. It also acts as an upstream data-contract monitor.
 
 The tests use a small hand-built dataset in [tests/fixtures](tests/fixtures) with known answers. It covers nested sub-themes, superseded inventory versions, spare parts and multi-colour parts.
+
+## Deployment
+
+The live demo runs on [Render](https://render.com)'s free tier, built from the Dockerfile on every push to `main`.
+
+- **No hosted database.** Visitors only read the data, and it changes once a day, so the Dockerfile's `demo` stage runs the pipeline at build time and builds the SQLite database into the image. The `api` stage, used by Compose and CI, contains no data.
+- **Nightly refresh, gated by CI.** The nightly workflow runs the pipeline first. Only if its schema and quality checks pass does it call a Render deploy hook, stored as a GitHub secret. If upstream data is broken, the live site keeps the last good version.
+- **Cache-aware rebuilds.** The `demo` stage `ADD`s Rebrickable's `sets.csv.gz` before the data step. Docker's layer cache is therefore keyed on the upstream data, and the data step only re-runs when Rebrickable publishes new data.
+
 
 ## Configuration
 
