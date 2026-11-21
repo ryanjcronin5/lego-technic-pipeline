@@ -44,11 +44,14 @@ def test_summary(loaded):
 
 
 def test_trends_exclude_empty_sets(loaded):
-    by_year = {r["year"]: r for r in analytics.yearly_trends(loaded)}
+    by_year = {r["year"]: r for r in analytics.yearly_trends(loaded, min_sets=1)}
     assert by_year[2020]["technic_sets"] == 1  # 9999-1 has 0 parts
     assert by_year[2017]["technic_avg_parts"] is None
     assert by_year[2017]["all_avg_parts"] == 7541.0
 
+def test_trends_skip_years_with_too_few_sets(loaded):
+    assert len(analytics.yearly_trends(loaded, min_sets=1)) == 5
+    assert analytics.yearly_trends(loaded, min_sets=2) == []
 
 def test_top_parts(loaded):
     top = analytics.top_parts(loaded, limit=2)
