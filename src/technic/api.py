@@ -107,8 +107,8 @@ def create_app(engine: Engine | None = None) -> FastAPI:
         return analytics.summary(engine)
 
     @app.get("/api/trends", response_model=list[YearTrend])
-    def trends():
-        return analytics.yearly_trends(engine)
+    def trends(min_sets: int = Query(20, ge=1, le=1000)):
+        return analytics.yearly_trends(engine, min_sets=min_sets)
 
     @app.get("/api/sets/biggest", response_model=list[BigSet])
     def biggest(limit: int = Query(10, ge=1, le=100)):

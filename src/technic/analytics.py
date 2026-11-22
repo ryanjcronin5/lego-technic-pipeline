@@ -43,8 +43,13 @@ def summary(engine: Engine) -> dict[str, Any]:
     return stats
 
 
-def yearly_trends(engine: Engine) -> list[dict[str, Any]]:
-    """Per year: Technic set count and average part count, vs the whole catalogue."""
+def yearly_trends(engine: Engine, min_sets: int = 20) -> list[dict[str, Any]]:
+    """Per year: Technic set count and average part count, vs the whole catalogue.
+
+    Years with fewer than `min_sets` sets in total are left out, because an
+    average over a handful of sets is mostly noise. For example, a future year
+    with only one announced set would otherwise spike the chart.
+    """
     rows = _rows(
         engine,
         """
@@ -55,8 +60,10 @@ def yearly_trends(engine: Engine) -> list[dict[str, Any]]:
         FROM sets
         WHERE num_parts > 0
         GROUP BY year
+        HAVING COUNT(*) >= :min_sets
         ORDER BY year
         """,
+        min_sets=min_sets,
     )
     for r in rows:
         for key in ("technic_avg_parts", "all_avg_parts"):

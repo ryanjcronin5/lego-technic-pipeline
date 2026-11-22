@@ -7,7 +7,7 @@
 
 ![Technic Insights dashboard](docs/dashboard.png)
 
-An automated data pipeline and analytics API over the full LEGO catalogue (~25k sets), focused on **LEGO Technic**. It downloads the public [Rebrickable](https://rebrickable.com/downloads/) data dumps on a schedule, validates and transforms them, loads them into Postgres (or SQLite) and serves the results through a FastAPI backend and a small dashboard.
+An automated data pipeline and analytics API over the full LEGO catalogue (~28k sets), focused on **LEGO Technic**. It downloads the public [Rebrickable](https://rebrickable.com/downloads/) data dumps on a schedule, validates and transforms them, loads them into Postgres (or SQLite) and serves the results through a FastAPI backend and a small dashboard.
 
 Questions it answers:
 
